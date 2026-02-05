@@ -1,14 +1,14 @@
 
-from db import create_tables
-from products import add_product, get_all_products, delete_product, get_product, update_product
-from orders import get_all_orders, create_order, get_order_details
+from backend.db import create_tables
+from backend.products import add_product, get_all_products, delete_product, get_product, update_product
+from backend.orders import get_all_orders, create_order, get_order_details
 
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash, abort
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
-from db import get_connection
+from backend.db import get_connection
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
@@ -244,4 +244,5 @@ def logout():
     return redirect("/login")
 
 if __name__ == "__main__":
+
     app.run(debug=True)
