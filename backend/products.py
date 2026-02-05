@@ -1,4 +1,4 @@
-from db import get_connection
+from backend.db import get_connection
 
 def add_product(name, price, unit, stock=0, discount=0):
     conn = get_connection()
@@ -38,3 +38,4 @@ def update_product(product_id, name, price, unit, stock, discount):
     """, (name, price, unit, stock, discount, product_id))
     conn.commit()
     conn.close()
+
