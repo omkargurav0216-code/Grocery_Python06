@@ -1,8 +1,8 @@
 import sqlite3
 import os
 
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-DB_DIR = os.path.join(BASE_DIR, "database")
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+DB_DIR = os.path.join(BASE_DIR, "..", "database")
 os.makedirs(DB_DIR, exist_ok=True)
 
 DB_NAME = os.path.join(DB_DIR, "grocery_store.db")
@@ -64,3 +64,4 @@ def create_tables():
 
     conn.commit()
     conn.close()
+
