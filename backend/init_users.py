@@ -1,4 +1,4 @@
-from db import get_connection, create_tables
+from backend.db import get_connection, create_tables
 from werkzeug.security import generate_password_hash
 
 def init_users():
@@ -24,4 +24,5 @@ def init_users():
     conn.close()
 
 if __name__ == "__main__":
+
     init_users()
