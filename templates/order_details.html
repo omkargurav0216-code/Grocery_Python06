@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container" style="max-width: 800px;">
+    <div style="margin-bottom: 20px;">
+        <a href="/" style="text-decoration: none; color: var(--text-sub); font-weight: 600;">← Back to Orders</a>
+    </div>
+
+    <div class="main-content">
+        <div class="flex-between"
+            style="border-bottom: 2px solid var(--bg-color); padding-bottom: 20px; margin-bottom: 20px;">
+            <div>
+                <span class="tag">ORDER #{{ order_id }}</span>
+                <div style="margin-top: 10px; font-weight: bold; font-size: 1.2em;">
+                    {{ order.customer_name }}
+                </div>
+                <div style="color: var(--text-sub); font-size: 0.9em;">
+                    {{ order.customer_address }}
+                </div>
+            </div>
+            <div style="text-align: right; color: var(--text-sub); font-size: 0.9em;">
+                Receipt Generated
+            </div>
+        </div>
+
+        <table style="margin-bottom: 30px;">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Price (Unit)</th>
+                    <th>Discount</th>
+                    <th>Quantity</th>
+                    <th class="text-right">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set ns = namespace(grand_total=0) %}
+                {% for item in details %}
+                {% set discounted_price = item.price * (1 - item.discount / 100) %}
+                {% set line_total = discounted_price * item.quantity %}
+                {% set ns.grand_total = ns.grand_total + line_total %}
+                <tr>
+                    <td><strong>{{ item.name }}</strong> ({{ item.unit }})</td>
+                    <td>₹{{ "%.2f"|format(item.price) }}</td>
+                    <td>
+                        {% if item.discount > 0 %}
+                        <span class="tag" style="font-size: 0.8em;">{{ item.discount }}% Off</span>
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                    <td>{{ item.quantity }}</td>
+                    <td class="text-right">₹{{ "%.2f"|format(line_total) }}</td>
+                </tr>
+                {% endfor %}
+                <tr style="border-top: 2px solid #ddd; font-weight: bold;">
+                    <td colspan="4" style="text-align: right;">Order Total:</td>
+                    <td class="text-right">₹{{ "%.2f"|format(order.total_amount) }}</td>
+                </tr>
+            </tbody>
+            <td colspan="3" style="text-align: right; padding-top: 20px; font-weight: 700; color: var(--text-sub);">
+                GRAND
+                TOTAL</td>
+            <td class="text-right" style="padding-top: 20px;">
+                <span class="stat-val" style="font-size: 1.5em;">₹{{ "%.2f"|format(ns.grand_total) }}</span>
+            </td>
+            </tr>
+            </tfoot>
+        </table>
+
+        <!-- Print Action (Optional, using JS) -->
+        <div style="text-align: right;">
+            <button onclick="window.print()" class="btn btn-small"
+                style="background: var(--bg-color); color: var(--text-main);">Print Receipt</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

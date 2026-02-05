@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form action="/new_order" method="POST" id="order-form">
+    <div class="page-header flex-between">
+        <h2 class="page-title">Create New Order</h2>
+        <input type="text" id="product-search" placeholder="Search products..."
+            style="padding: 10px; border-radius: 20px; border: 1px solid #ddd; width: 300px;">
+    </div>
+
+    {% if error %}
+    <div
+        style="background-color: #ffebee; color: #c62828; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ffcdd2;">
+        <strong>Error:</strong> {{ error }}
+    </div>
+    {% endif %}
+
+    <div class="dashboard-grid">
+        <!-- Sidebar: Customer Info & Total -->
+        <div class="sidebar">
+            <div class="card" style="position: sticky; top: 20px;">
+                <h3 style="margin-top: 0; margin-bottom: 20px;">Customer Details</h3>
+                <div class="form-group">
+                    <label>Customer Name</label>
+                    <input type="text" name="customer_name" required placeholder="Enter name" value="{{ customer_name or '' }}">
+                </div>
+                <div class="form-group">
+                    <label>Address</label>
+                    <textarea name="customer_address" rows="3" required placeholder="Enter delivery address">{{ customer_address or '' }}</textarea>
+                </div>
+
+                <div style="margin-top: 20px; border-top: 2px solid #f0f0f0; padding-top: 20px;">
+                    <div class="flex-between">
+                        <span style="font-weight: 600; color: var(--text-sub);">Estimated Total:</span>
+                        <span style="font-weight: 700; color: var(--primary); font-size: 1.4em;">₹<span
+                                id="total-display">0.00</span></span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-block" style="margin-top: 20px;">Place Order</button>
+            </div>
+        </div>
+
+        <!-- Main: Product Grid -->
+        <div class="main-content">
+            <div class="product-grid"
+                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px;">
+                {% for p in products %}
+                <div class="card product-card"
+                    style="margin: 0; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                            <div style="font-weight: 700; font-size: 1.1em;">{{ p.name }}</div>
+                            <div style="font-size: 0.85em; background: #f0f0f0; padding: 2px 6px; border-radius: 4px;">
+                                {{ p.unit }}</div>
+                        </div>
+
+                        <div style="margin-bottom: 15px;">
+                            {% if p.stock > 0 %}
+                            <div style="font-size: 0.85em; color: #2e7d32; font-weight: 600; margin-bottom: 5px;">In
+                                Stock: {{ p.stock }}</div>
+                            {% else %}
+                            <div style="font-size: 0.85em; color: #c62828; font-weight: 600; margin-bottom: 5px;">Out of
+                                Stock</div>
+                            {% endif %}
+
+                            <!-- Price Section -->
+                            {% if p.discount > 0 %}
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 1.25em; font-weight: 700; color: var(--text-main);">₹{{
+                                    "%.2f"|format(p.price * (1 - p.discount / 100)) }}</span>
+                                <span style="text-decoration: line-through; color: #999; font-size: 0.9em;">₹{{
+                                    "%.2f"|format(p.price) }}</span>
+                            </div>
+                            <div
+                                style="font-size: 0.75em; color: #ffffff; background: #e53935; display: inline-block; padding: 2px 6px; border-radius: 4px; margin-top: 4px;">
+                                -{{ p.discount }}% OFF</div>
+                            {% set final_price = p.price * (1 - p.discount / 100) %}
+                            {% else %}
+                            <div style="font-size: 1.25em; font-weight: 700; color: var(--text-main);">₹{{
+                                "%.2f"|format(p.price) }}</div>
+                            {% set final_price = p.price %}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 0;">
+                        {% if p.stock > 0 %}
+                        <label style="font-size: 0.8em; margin-bottom: 4px;">Quantity</label>
+                        <input type="number" name="qty_{{ p.product_id }}" class="qty-input"
+                            data-price="{{ final_price }}" placeholder="0" min="0" max="{{ p.stock }}" step="0.001"
+                            style="text-align: center; font-size: 1.1em; font-weight: 600;">
+                        {% else %}
+                        <input type="text" disabled value="Unavailable"
+                            style="text-align: center; background: #f5f5f5; color: #999; border: 1px solid #ddd;">
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Total Calculation
+        const inputs = document.querySelectorAll('.qty-input');
+        const totalDisplay = document.getElementById('total-display');
+
+        function calculateTotal() {
+            let total = 0;
+            inputs.forEach(input => {
+                const qty = parseFloat(input.value) || 0;
+                const price = parseFloat(input.dataset.price) || 0;
+                total += qty * price;
+            });
+            totalDisplay.textContent = total.toFixed(2);
+        }
+
+        inputs.forEach(input => {
+            input.addEventListener('input', calculateTotal);
+        });
+
+        // Search Functionality
+        const searchInput = document.getElementById('product-search');
+        const cards = document.querySelectorAll('.product-card');
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function (e) {
+                const term = e.target.value.toLowerCase();
+                cards.forEach(card => {
+                    const text = card.innerText.toLowerCase();
+                    if (text.includes(term)) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}

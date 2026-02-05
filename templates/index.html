@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-grid">
+    <!-- Sidebar Stats -->
+    <div class="sidebar">
+        <div class="stat-card">
+            <div class="stat-label">Total Orders</div>
+            <div class="stat-val">{{ orders|length }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">System Status</div>
+            <div class="stat-val" style="color: #10b981; font-size: 1.2em;">ONLINE</div>
+        </div>
+        <a href="/new_order" class="btn btn-block">+ Create Order</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <h2 class="page-title">Recent Order History</h2>
+
+        {% if orders %}
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Customer Name</th>
+                    <th>Address</th>
+                    <th>Date</th>
+                    <th>Total</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr onclick="window.location='/order/{{ order.order_id }}'" style="cursor: pointer;">
+                    <td>#{{ order.order_id }}</td>
+                    <td>{{ order.customer_name }}</td>
+                    <td
+                        style="font-size: 0.9em; color: var(--text-sub); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        {{ order.customer_address }}</td>
+                    <td>{{ order.order_date }}</td>
+                    <td><span class="tag">₹{{ "%.2f"|format(order.total_amount) }}</span></td>
+                    <td style="text-align: right;">
+                        <span style="color: var(--primary);">→</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div style="text-align: center; padding: 40px; color: var(--text-sub);">
+            <p>No orders currently in the system.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

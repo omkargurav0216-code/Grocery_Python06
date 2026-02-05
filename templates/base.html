@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bhaaji Mart</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.lordicon.com/lordicon.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Top Navigation Bar -->
+        <div class="top-bar">
+            <a href="/" class="logo">Bhaaji Mart</a>
+            <div class="nav">
+                {% if current_user.is_authenticated %}
+                <a href="/"
+                    class="{% if request.path == '/' or request.path.startswith('/order/') %}active{% endif %}">Orders</a>
+
+                {% if current_user.role == 'admin' %}
+                <a href="/products"
+                    class="{% if request.path == '/products' or request.path.startswith('/edit_product') %}active{% endif %}">Products</a>
+                {% endif %}
+
+                {% if current_user.role == 'customer' %}
+                <a href="/new_order" class="{% if request.path == '/new_order' %}active{% endif %}">New Order</a>
+                {% endif %}
+
+                <a href="/logout">Logout ({{ current_user.username }})</a>
+                {% else %}
+                <a href="/login" class="{% if request.path == '/login' %}active{% endif %}">Login</a>
+                {% endif %}
+            </div>
+        </div>
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Success Popup -->
+    <div id="success-popup" class="success-popup">
+        <div class="success-icon">✓</div>
+        <div id="success-message">Operation Completed</div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+        // Check for success param and trigger popup
+        const urlParams = new URLSearchParams(window.location.search);
+        const success = urlParams.get('success');
+        if (success) {
+            const popup = document.getElementById('success-popup');
+            const msg = document.getElementById('success-message');
+
+            if (success === 'new_order') msg.textContent = 'Order Placed Successfully!';
+            if (success === 'product_added') msg.textContent = 'Product Added to Inventory!';
+
+            setTimeout(() => popup.classList.add('show'), 500);
+            setTimeout(() => popup.classList.remove('show'), 5000); // Auto hide after 5s
+        }
+    </script>
+</body>
+
+</html>
